@@ -14,11 +14,15 @@ import java.io.IOException;
 @Profile("demo")
 @Component
 public class HeatmapPngGenerator implements PngGenerator {
+
     @Override
     public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
+        //FIXME:  this is all kinds of broken.  it's also not very reactive nor particularly optimized for either readability
+        //or performance.  basically, this is horrible right now
+
         BoundingBox tileBoundingBox = new BoundingBox(x, y, z);
-        double xScale = (tileBoundingBox.west - tileBoundingBox.east) * 256;
-        double yScale = (tileBoundingBox.south - tileBoundingBox.north) * 256;
+        double xScale = (tileBoundingBox.getWest() - tileBoundingBox.getEast()) * 256;
+        double yScale = (tileBoundingBox.getSouth() - tileBoundingBox.getNorth()) * 256;
 
         BufferedImage img = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
@@ -28,7 +32,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         g2d.setComposite(AlphaComposite.Src);
         g2d.setColor(Color.BLUE);
 
-        System.out.println("Tile bounds are:"+tileBoundingBox.north+","+tileBoundingBox.west+","+tileBoundingBox.south+","+tileBoundingBox.east);
+        System.out.println("Tile bounds are:"+tileBoundingBox.getNorth()+","+tileBoundingBox.getWest()+","+tileBoundingBox.getSouth()+","+tileBoundingBox.getEast());
 
         for(GeoGrid.Bucket bucket:geoGrid.getBuckets()){
             String key = bucket.getKeyAsString();
@@ -38,11 +42,11 @@ public class HeatmapPngGenerator implements PngGenerator {
             int bucketY = Integer.parseInt(zxy[2]);
 
             BoundingBox bucketBoundingBox = new BoundingBox(bucketX, bucketY, bucketZ);
-            System.out.println("Bucket bounds are:"+bucketBoundingBox.north+","+bucketBoundingBox.west+","+bucketBoundingBox.south+","+bucketBoundingBox.east);
-            double offsetX = bucketBoundingBox.west - tileBoundingBox.west;
-            double offsetY = bucketBoundingBox.north - tileBoundingBox.north;
-            double width = bucketBoundingBox.west - bucketBoundingBox.east;
-            double height = bucketBoundingBox.south - bucketBoundingBox.north;
+            System.out.println("Bucket bounds are:"+bucketBoundingBox.getNorth()+","+bucketBoundingBox.getWest()+","+bucketBoundingBox.getSouth()+","+bucketBoundingBox.getEast());
+            double offsetX = bucketBoundingBox.getWest() - tileBoundingBox.getWest();
+            double offsetY = bucketBoundingBox.getNorth() - tileBoundingBox.getNorth();
+            double width = bucketBoundingBox.getWest() - bucketBoundingBox.getEast();
+            double height = bucketBoundingBox.getSouth() - bucketBoundingBox.getNorth();
             System.out.println("Offset:"+offsetX+"/"+offsetY);
             System.out.println("Extent:"+width+"/"+height);
 

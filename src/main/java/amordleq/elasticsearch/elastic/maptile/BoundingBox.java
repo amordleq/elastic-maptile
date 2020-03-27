@@ -1,8 +1,8 @@
 package amordleq.elasticsearch.elastic.maptile;
 
-import lombok.Getter;
+import lombok.Value;
 
-@Getter
+@Value
 public class BoundingBox {
     double north;
     double south;

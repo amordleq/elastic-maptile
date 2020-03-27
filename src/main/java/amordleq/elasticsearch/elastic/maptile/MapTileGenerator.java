@@ -44,7 +44,7 @@ public class MapTileGenerator {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(
                 QueryBuilders.geoBoundingBoxQuery("location")
-                        .setCorners(boundingBox.north, boundingBox.west, boundingBox.south, boundingBox.east));
+                        .setCorners(boundingBox.getNorth(), boundingBox.getWest(), boundingBox.getSouth(), boundingBox.getEast()));
         searchSourceBuilder.size(0);
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");

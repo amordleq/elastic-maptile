@@ -11,6 +11,8 @@ import reactor.core.Exceptions;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.MonoSink;
 
+// TODO: It would be nice to be able to use Spring's client instead of rolling my own here, but they don't seem
+// to expose a way to get at the aggregation results.
 @Component
 public class ReactiveRestHighLevelClient {
 
