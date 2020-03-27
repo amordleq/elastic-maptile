@@ -8,6 +8,7 @@ import org.elasticsearch.search.aggregations.bucket.geogrid.GeoTileGridAggregati
 import org.elasticsearch.search.aggregations.bucket.geogrid.ParsedGeoTileGrid;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
@@ -23,6 +24,9 @@ public class MapTileGenerator {
 
     @Autowired
     ReactiveRestHighLevelClient reactiveRestHighLevelClient;
+
+    @Value("${elastic.maptile.granularityStep}")
+    int granularityStep;
 
     @Autowired
     PngGenerator pngGenerator;
@@ -47,7 +51,7 @@ public class MapTileGenerator {
         searchSourceBuilder.size(0);
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
-        aggregrationBuilder.field("location").precision(zoom + 3);
+        aggregrationBuilder.field("location").precision(zoom + granularityStep);
         aggregrationBuilder.size(500000);
         searchSourceBuilder.aggregation(aggregrationBuilder);
 
