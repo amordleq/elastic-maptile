@@ -21,8 +21,8 @@ public class HeatmapPngGenerator implements PngGenerator {
         //or performance.  basically, this is horrible right now
 
         BoundingBox tileBoundingBox = new BoundingBox(x, y, z);
-        double xScale = (tileBoundingBox.getWest() - tileBoundingBox.getEast()) * 256;
-        double yScale = (tileBoundingBox.getSouth() - tileBoundingBox.getNorth()) * 256;
+        double xScale = Math.abs(tileBoundingBox.getWest() - tileBoundingBox.getEast()) / 256;
+        double yScale = Math.abs(tileBoundingBox.getSouth() - tileBoundingBox.getNorth()) / 256;
 
         BufferedImage img = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
@@ -45,8 +45,8 @@ public class HeatmapPngGenerator implements PngGenerator {
             System.out.println("Bucket bounds are:"+bucketBoundingBox.getNorth()+","+bucketBoundingBox.getWest()+","+bucketBoundingBox.getSouth()+","+bucketBoundingBox.getEast());
             double offsetX = bucketBoundingBox.getWest() - tileBoundingBox.getWest();
             double offsetY = bucketBoundingBox.getNorth() - tileBoundingBox.getNorth();
-            double width = bucketBoundingBox.getWest() - bucketBoundingBox.getEast();
-            double height = bucketBoundingBox.getSouth() - bucketBoundingBox.getNorth();
+            double width = Math.abs(bucketBoundingBox.getWest() - bucketBoundingBox.getEast());
+            double height = Math.abs(bucketBoundingBox.getSouth() - bucketBoundingBox.getNorth());
             System.out.println("Offset:"+offsetX+"/"+offsetY);
             System.out.println("Extent:"+width+"/"+height);
 
@@ -55,7 +55,7 @@ public class HeatmapPngGenerator implements PngGenerator {
             int scaledWidth = Math.abs((int)(width / xScale));
             int scaledHeight = Math.abs((int)(height / yScale));
 
-            g2d.drawRect(scaledX, scaledY, scaledWidth, scaledHeight);
+            g2d.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
         }
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
