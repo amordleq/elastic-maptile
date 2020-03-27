@@ -46,7 +46,7 @@ public class MapTileGenerator {
         searchSourceBuilder.size(0);
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
-        aggregrationBuilder.field("location").precision(4);
+        aggregrationBuilder.field("location").precision(zoom + 3);
         aggregrationBuilder.size(100000);
         searchSourceBuilder.aggregation(aggregrationBuilder);
 
