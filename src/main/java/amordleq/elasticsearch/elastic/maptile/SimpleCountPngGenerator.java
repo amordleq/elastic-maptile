@@ -17,7 +17,7 @@ import java.io.IOException;
 public class SimpleCountPngGenerator implements PngGenerator {
 
     @Override
-    public byte[] generatePng(GeoGrid geoGrid) {
+    public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
         try {
             Long totalCount = geoGrid.getBuckets().stream()
                     .map(MultiBucketsAggregation.Bucket::getDocCount)

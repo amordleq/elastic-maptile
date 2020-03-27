@@ -19,7 +19,7 @@ public class TestPngGenerator implements PngGenerator{
 
 
     @Override
-    public byte[] generatePng(GeoGrid geoGrid) {
+    public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
         try {
             return Files.readAllBytes(Paths.get(testTile.getURI()));
         } catch (IOException e) {

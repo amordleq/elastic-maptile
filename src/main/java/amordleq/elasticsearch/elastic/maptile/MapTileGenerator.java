@@ -34,7 +34,9 @@ public class MapTileGenerator {
                 .cast(ParsedGeoTileGrid.class)
 //                .doOnEach(System.out::println)
                 .single()
-                .map(pngGenerator::generatePng);
+                .map(grid -> {
+                    return pngGenerator.generatePng(x, y, z, grid);
+                });
     }
 
     Mono<SearchResponse> queryElasticsearch(int x, int y, int zoom) {
@@ -47,7 +49,7 @@ public class MapTileGenerator {
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
         aggregrationBuilder.field("location").precision(zoom + 3);
-        aggregrationBuilder.size(100000);
+        aggregrationBuilder.size(500000);
         searchSourceBuilder.aggregation(aggregrationBuilder);
 
         SearchRequest searchRequest = new SearchRequest("cell-towers");
