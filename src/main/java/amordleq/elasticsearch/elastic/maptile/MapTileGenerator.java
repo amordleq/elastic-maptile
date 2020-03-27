@@ -32,7 +32,7 @@ public class MapTileGenerator {
         return queryElasticsearch(x, y, z)
                 .flatMapMany(searchResponse -> Flux.just(searchResponse.getAggregations().get("agg")))
                 .cast(ParsedGeoTileGrid.class)
-                .doOnEach(System.out::println)
+//                .doOnEach(System.out::println)
                 .single()
                 .map(pngGenerator::generatePng);
     }
