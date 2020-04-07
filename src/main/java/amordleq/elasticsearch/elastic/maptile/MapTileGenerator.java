@@ -37,9 +37,13 @@ public class MapTileGenerator {
                 .flatMapMany(searchResponse -> Flux.just(searchResponse.getAggregations().get("agg")))
                 .cast(ParsedGeoTileGrid.class)
                 .single()
+                .name("elastic-aggregation")
+                .metrics()
                 .map(grid -> {
                     return pngGenerator.generatePng(x, y, z, grid);
-                });
+                })
+                .name("tile-generation")
+                .metrics();
     }
 
     Mono<SearchResponse> queryElasticsearch(int x, int y, int zoom) {

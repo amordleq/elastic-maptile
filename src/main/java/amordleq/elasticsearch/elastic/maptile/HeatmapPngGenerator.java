@@ -22,6 +22,7 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     @Override
     public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
+//        long start = System.currentTimeMillis();
         BoundingBox tileBoundingBox = new BoundingBox(x, y, z);
         Scale scale = new Scale(tileBoundingBox, 256);
 
@@ -53,6 +54,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         }
+//        LOG.debug("Took {} milliseconds", System.currentTimeMillis() - start);
         return byteArrayOutputStream.toByteArray();
     }
 
