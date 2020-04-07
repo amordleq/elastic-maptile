@@ -12,6 +12,7 @@ import reactor.core.publisher.Mono;
 import javax.imageio.ImageIO;
 import java.awt.*;
 import java.awt.image.BufferedImage;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
@@ -30,9 +31,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         Graphics2D g2d = img.createGraphics();
         g2d.setComposite(AlphaComposite.Clear);
         g2d.fillRect(0, 0, 256, 256);
-
-        AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f);
-        g2d.setComposite(alphaComposite);
+        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
 
         LOG.trace("Tile bounds are: {},{},{},{}", tileBoundingBox.getNorth(), tileBoundingBox.getWest(), tileBoundingBox.getSouth(), tileBoundingBox.getEast());
 
@@ -57,8 +56,10 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     private byte[] imageToByteArray(BufferedImage image) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
+
         try {
-            ImageIO.write(image, "PNG", byteArrayOutputStream);
+            ImageIO.write(image, "PNG", bufferedOutputStream);
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         }
@@ -77,9 +78,21 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     private Color calculateColorForBucket(GeoGrid.Bucket bucket, int zoomLevel) {
         long docCount = bucket.getDocCount();
-        double intensityScale = docCount / (30000f / zoomLevel);
-        int intensity = Math.min((int) (255 * intensityScale), 240);
-        return new Color(intensity, intensity, 250);
+        double intensityScale = docCount / (20000f / (zoomLevel + 3));
+
+        int redMin = 0;
+        int greenMin = 46;
+        int blueMin = 120;
+
+        int redMax = 207;
+        int greenMax = 255;
+        int blueMax = 255;
+
+        int red = (int) (((redMax - redMin) * intensityScale) + redMin);
+        int green = (int) (((greenMax - greenMin) * intensityScale) + greenMin);
+        int blue = (int) (((blueMax - blueMin) * intensityScale) + blueMin);
+
+        return new Color(Math.min(red, 255), Math.min(green, 255), Math.min(blue, 255));
     }
 
     @Value
