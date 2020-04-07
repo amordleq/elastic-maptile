@@ -9,6 +9,10 @@ public class BoundingBox {
     double east;
     double west;
 
+    BoundingBox(MapTileCoordinates mapTileCoordinates) {
+        this(mapTileCoordinates.getX(), mapTileCoordinates.getY(), mapTileCoordinates.getZ());
+    }
+
     BoundingBox(final int x, final int y, final int zoom) {
         north = tile2lat(y, zoom);
         south = tile2lat(y + 1, zoom);

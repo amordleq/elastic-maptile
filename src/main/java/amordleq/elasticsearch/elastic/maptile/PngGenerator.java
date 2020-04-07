@@ -1,7 +1,7 @@
 package amordleq.elasticsearch.elastic.maptile;
 
-import org.elasticsearch.search.aggregations.bucket.geogrid.GeoGrid;
+import reactor.core.publisher.Mono;
 
 public interface PngGenerator {
-    byte[] generatePng(int x, int y, int z, GeoGrid geoGrid);
+    Mono<byte[]> generatePng(MapTileGrid response);
 }

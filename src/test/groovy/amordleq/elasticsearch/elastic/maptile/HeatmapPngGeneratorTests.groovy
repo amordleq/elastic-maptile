@@ -24,13 +24,13 @@ class HeatmapPngGeneratorTests extends Specification {
         bucket.getKeyAsString() >> "5/2/4"
 
         expect:
-        JFrame frame = showImage(generator.generatePng(tileX, tileY, tileZ, geoGrid))
+        JFrame frame = showImage(generator.generatePng(tileX, tileY, tileZ, geoGrid).block())
         while(frame?.visible) {
             sleep(1000);
         }
     }
 
-    JFrame showImage(byte[] imageData) {
+    private static JFrame showImage(byte[] imageData) {
         JFrame frame = new JFrame();
         ImageIcon icon = new ImageIcon(imageData);
         JLabel label = new JLabel(icon);

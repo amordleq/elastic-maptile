@@ -1,10 +1,10 @@
 package amordleq.elasticsearch.elastic.maptile;
 
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.elasticsearch.search.aggregations.bucket.geogrid.GeoGrid;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Mono;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,12 +17,12 @@ import java.io.IOException;
 public class SimpleCountPngGenerator implements PngGenerator {
 
     @Override
-    public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
+    public Mono<byte[]> generatePng(MapTileGrid response) {
         try {
-            Long totalCount = geoGrid.getBuckets().stream()
+            Long totalCount = response.getGrid().getBuckets().stream()
                     .map(MultiBucketsAggregation.Bucket::getDocCount)
                     .reduce(0L, Long::sum);
-            return generatePng(totalCount);
+            return Mono.just(generatePng(totalCount));
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         }

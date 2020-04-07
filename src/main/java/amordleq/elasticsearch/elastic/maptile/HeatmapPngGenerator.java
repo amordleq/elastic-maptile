@@ -7,6 +7,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
+import reactor.core.publisher.Mono;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -21,9 +22,8 @@ public class HeatmapPngGenerator implements PngGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(HeatmapPngGenerator.class);
 
     @Override
-    public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
-//        long start = System.currentTimeMillis();
-        BoundingBox tileBoundingBox = new BoundingBox(x, y, z);
+    public Mono<byte[]> generatePng(MapTileGrid mapTileGrid) {
+        BoundingBox tileBoundingBox = new BoundingBox(mapTileGrid.getCoordinates());
         Scale scale = new Scale(tileBoundingBox, 256);
 
         BufferedImage img = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
@@ -36,25 +36,33 @@ public class HeatmapPngGenerator implements PngGenerator {
 
         LOG.trace("Tile bounds are: {},{},{},{}", tileBoundingBox.getNorth(), tileBoundingBox.getWest(), tileBoundingBox.getSouth(), tileBoundingBox.getEast());
 
-        for (GeoGrid.Bucket bucket : geoGrid.getBuckets()) {
-            BoundingBox bucketBoundingBox = createBoundingBoxFromBucket(bucket);
-            LOG.trace("Bucket bounds are:{},{},{},{}", bucketBoundingBox.getNorth(), bucketBoundingBox.getWest(), bucketBoundingBox.getSouth(), bucketBoundingBox.getEast());
-
-            OffsetBox offsetBox = new OffsetBox(bucketBoundingBox, tileBoundingBox);
-            LOG.trace("Offset:{}/{}", offsetBox.getOffsetX(), offsetBox.getOffsetY());
-            LOG.trace("Extent:{}/{}", offsetBox.getWidth(), offsetBox.getHeight());
-
-            g2d.setColor(calculateColorForBucket(bucket, z));
-            g2d.fillRect(scale.scaleX(offsetBox), scale.scaleY(offsetBox), scale.scaleWidth(offsetBox), scale.scaleHeight(offsetBox));
+        for (GeoGrid.Bucket bucket : mapTileGrid.getGrid().getBuckets()) {
+            writeToGraphics(g2d, bucket, tileBoundingBox, scale, mapTileGrid.getCoordinates().getZ());
         }
 
+        return Mono.just(imageToByteArray(img));
+    }
+
+    private void writeToGraphics(Graphics2D g2d, GeoGrid.Bucket bucket, BoundingBox tileBoundingBox, Scale scale, int z) {
+        BoundingBox bucketBoundingBox = createBoundingBoxFromBucket(bucket);
+        LOG.trace("Bucket bounds are:{},{},{},{}", bucketBoundingBox.getNorth(), bucketBoundingBox.getWest(), bucketBoundingBox.getSouth(), bucketBoundingBox.getEast());
+
+        OffsetBox offsetBox = new OffsetBox(bucketBoundingBox, tileBoundingBox);
+        LOG.trace("Offset:{}/{}", offsetBox.getOffsetX(), offsetBox.getOffsetY());
+        LOG.trace("Extent:{}/{}", offsetBox.getWidth(), offsetBox.getHeight());
+
+        g2d.setColor(calculateColorForBucket(bucket, z));
+        g2d.fillRect(scale.scaleX(offsetBox), scale.scaleY(offsetBox), scale.scaleWidth(offsetBox), scale.scaleHeight(offsetBox));
+    }
+
+    private byte[] imageToByteArray(BufferedImage image) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
         try {
-            ImageIO.write(img, "PNG", byteArrayOutputStream);
+            ImageIO.write(image, "PNG", byteArrayOutputStream);
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         }
-//        LOG.debug("Took {} milliseconds", System.currentTimeMillis() - start);
+
         return byteArrayOutputStream.toByteArray();
     }
 

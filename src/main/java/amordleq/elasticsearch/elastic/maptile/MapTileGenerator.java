@@ -31,23 +31,30 @@ public class MapTileGenerator {
     @Autowired
     PngGenerator pngGenerator;
 
-    Mono<byte[]> generateTileMap(int z, int x, int y) {
+    Mono<byte[]> generateTileMap(final MapTileCoordinates coordinates) {
+        return findGrid(coordinates)
+                .as(this::createTilePng);
+    }
 
-        return queryElasticsearch(x, y, z)
+    Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates) {
+        return queryElasticsearch(coordinates)
                 .flatMapMany(searchResponse -> Flux.just(searchResponse.getAggregations().get("agg")))
-                .cast(ParsedGeoTileGrid.class)
-                .single()
                 .name("elastic-aggregation")
                 .metrics()
-                .map(grid -> {
-                    return pngGenerator.generatePng(x, y, z, grid);
-                })
+                .cast(ParsedGeoTileGrid.class)
+                .single()
+                .map(grid -> new MapTileGrid(coordinates, grid));
+    }
+
+    Mono<byte[]> createTilePng(Mono<MapTileGrid> mapTileGrid) {
+        return mapTileGrid
+                .flatMap(grid -> pngGenerator.generatePng(grid))
                 .name("tile-generation")
                 .metrics();
     }
 
-    Mono<SearchResponse> queryElasticsearch(int x, int y, int zoom) {
-        BoundingBox boundingBox = new BoundingBox(x, y, zoom);
+    Mono<SearchResponse> queryElasticsearch(MapTileCoordinates coordinates) {
+        BoundingBox boundingBox = new BoundingBox(coordinates);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(
                 QueryBuilders.geoBoundingBoxQuery("location")
@@ -55,7 +62,7 @@ public class MapTileGenerator {
         searchSourceBuilder.size(0);
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
-        aggregrationBuilder.field("location").precision(zoom + granularityStep);
+        aggregrationBuilder.field("location").precision(coordinates.getZ() + granularityStep);
         aggregrationBuilder.size(500000);
         searchSourceBuilder.aggregation(aggregrationBuilder);
 

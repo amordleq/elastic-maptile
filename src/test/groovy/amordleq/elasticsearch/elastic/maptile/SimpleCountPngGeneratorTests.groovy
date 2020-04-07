@@ -18,7 +18,7 @@ class SimpleCountPngGeneratorTests extends Specification {
         }
     }
 
-    JFrame showImage(byte[] imageData) {
+    private static JFrame showImage(byte[] imageData) {
         JFrame frame = new JFrame();
         ImageIcon icon = new ImageIcon(imageData);
         JLabel label = new JLabel(icon);

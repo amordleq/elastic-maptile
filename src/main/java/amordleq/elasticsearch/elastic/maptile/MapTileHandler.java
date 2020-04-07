@@ -20,6 +20,7 @@ public class MapTileHandler {
         int x = Integer.parseInt(serverRequest.pathVariable("x"));
         int y = Integer.parseInt(serverRequest.pathVariable("y"));
 
-        return ServerResponse.ok().contentType(MediaType.IMAGE_PNG).body(generator.generateTileMap(z, x, y), byte[].class);
+        return ServerResponse.ok().contentType(MediaType.IMAGE_PNG)
+                .body(generator.generateTileMap(new MapTileCoordinates(x, y, z)), byte[].class);
     }
 }
