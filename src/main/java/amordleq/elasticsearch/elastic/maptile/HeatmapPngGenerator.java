@@ -1,5 +1,6 @@
 package amordleq.elasticsearch.elastic.maptile;
 
+import lombok.Value;
 import org.elasticsearch.search.aggregations.bucket.geogrid.GeoGrid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,12 +22,8 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     @Override
     public byte[] generatePng(int x, int y, int z, GeoGrid geoGrid) {
-        //FIXME:  this is all kinds of broken.  it's also not very reactive nor particularly optimized for either readability
-        //or performance.  basically, this is horrible right now
-
         BoundingBox tileBoundingBox = new BoundingBox(x, y, z);
-        double xScale = Math.abs(tileBoundingBox.getWest() - tileBoundingBox.getEast()) / 256;
-        double yScale = Math.abs(tileBoundingBox.getSouth() - tileBoundingBox.getNorth()) / 256;
+        Scale scale = new Scale(tileBoundingBox, 256);
 
         BufferedImage img = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
@@ -35,37 +32,19 @@ public class HeatmapPngGenerator implements PngGenerator {
 
         AlphaComposite alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f);
         g2d.setComposite(alphaComposite);
-        g2d.setColor(Color.BLUE);
 
         LOG.trace("Tile bounds are: {},{},{},{}", tileBoundingBox.getNorth(), tileBoundingBox.getWest(), tileBoundingBox.getSouth(), tileBoundingBox.getEast());
 
         for (GeoGrid.Bucket bucket : geoGrid.getBuckets()) {
-            String key = bucket.getKeyAsString();
-            long docCount = bucket.getDocCount();
-            double intensityScale = docCount / (30000f / z);
-            int intensity = Math.min((int) (255 * intensityScale), 240);
-            g2d.setColor(new Color(intensity, intensity, 255));
-
-            String[] zxy = key.split("/");
-            int bucketZ = Integer.parseInt(zxy[0]);
-            int bucketX = Integer.parseInt(zxy[1]);
-            int bucketY = Integer.parseInt(zxy[2]);
-
-            BoundingBox bucketBoundingBox = new BoundingBox(bucketX, bucketY, bucketZ);
+            BoundingBox bucketBoundingBox = createBoundingBoxFromBucket(bucket);
             LOG.trace("Bucket bounds are:{},{},{},{}", bucketBoundingBox.getNorth(), bucketBoundingBox.getWest(), bucketBoundingBox.getSouth(), bucketBoundingBox.getEast());
-            double offsetX = bucketBoundingBox.getWest() - tileBoundingBox.getWest();
-            double offsetY = bucketBoundingBox.getNorth() - tileBoundingBox.getNorth();
-            double width = Math.abs(bucketBoundingBox.getWest() - bucketBoundingBox.getEast());
-            double height = Math.abs(bucketBoundingBox.getSouth() - bucketBoundingBox.getNorth());
-            LOG.trace("Offset:{}/{}", offsetX, offsetY);
-            LOG.trace("Extent:{}/{}", width, height);
 
-            int scaledX = Math.abs((int) (offsetX / xScale));
-            int scaledY = Math.abs((int) (offsetY / yScale));
-            int scaledWidth = Math.abs((int) (width / xScale));
-            int scaledHeight = Math.abs((int) (height / yScale));
+            OffsetBox offsetBox = new OffsetBox(bucketBoundingBox, tileBoundingBox);
+            LOG.trace("Offset:{}/{}", offsetBox.getOffsetX(), offsetBox.getOffsetY());
+            LOG.trace("Extent:{}/{}", offsetBox.getWidth(), offsetBox.getHeight());
 
-            g2d.fillRect(scaledX, scaledY, scaledWidth, scaledHeight);
+            g2d.setColor(calculateColorForBucket(bucket, z));
+            g2d.fillRect(scale.scaleX(offsetBox), scale.scaleY(offsetBox), scale.scaleWidth(offsetBox), scale.scaleHeight(offsetBox));
         }
 
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -75,5 +54,63 @@ public class HeatmapPngGenerator implements PngGenerator {
             throw Exceptions.propagate(e);
         }
         return byteArrayOutputStream.toByteArray();
+    }
+
+    private BoundingBox createBoundingBoxFromBucket(GeoGrid.Bucket bucket) {
+        String key = bucket.getKeyAsString();
+        String[] zxy = key.split("/");
+        int bucketZ = Integer.parseInt(zxy[0]);
+        int bucketX = Integer.parseInt(zxy[1]);
+        int bucketY = Integer.parseInt(zxy[2]);
+        return new BoundingBox(bucketX, bucketY, bucketZ);
+    }
+
+    private Color calculateColorForBucket(GeoGrid.Bucket bucket, int zoomLevel) {
+        long docCount = bucket.getDocCount();
+        double intensityScale = docCount / (30000f / zoomLevel);
+        int intensity = Math.min((int) (255 * intensityScale), 240);
+        return new Color(intensity, intensity, 250);
+    }
+
+    @Value
+    private static class OffsetBox {
+        double offsetX;
+        double offsetY;
+        double width;
+        double height;
+
+        public OffsetBox(BoundingBox bucketBoundingBox, BoundingBox tileBoundingBox) {
+            offsetX = bucketBoundingBox.getWest() - tileBoundingBox.getWest();
+            offsetY = bucketBoundingBox.getNorth() - tileBoundingBox.getNorth();
+            width = Math.abs(bucketBoundingBox.getWest() - bucketBoundingBox.getEast());
+            height = Math.abs(bucketBoundingBox.getSouth() - bucketBoundingBox.getNorth());
+        }
+    }
+
+    @Value
+    private static class Scale {
+        double xScale;
+        double yScale;
+
+        public Scale(BoundingBox tileBoundingBox, int imageSize) {
+            xScale = Math.abs(tileBoundingBox.getWest() - tileBoundingBox.getEast()) / imageSize;
+            yScale = Math.abs(tileBoundingBox.getSouth() - tileBoundingBox.getNorth()) / imageSize;
+        }
+
+        public int scaleX(OffsetBox offsetBox) {
+            return Math.abs((int) (offsetBox.getOffsetX() / xScale));
+        }
+
+        public int scaleY(OffsetBox offsetBox) {
+            return Math.abs((int) (offsetBox.getOffsetY() / yScale));
+        }
+
+        public int scaleWidth(OffsetBox offsetBox) {
+            return Math.abs((int) (offsetBox.getWidth() / xScale));
+        }
+
+        public int scaleHeight(OffsetBox offsetBox) {
+            return Math.abs((int) (offsetBox.getHeight() / yScale));
+        }
     }
 }
