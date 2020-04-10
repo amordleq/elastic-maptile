@@ -78,7 +78,7 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     private Color calculateColorForBucket(GeoGrid.Bucket bucket, int zoomLevel) {
         long docCount = bucket.getDocCount();
-        double intensityScale = docCount / (20000f / (zoomLevel + 3));
+        double intensityScale = docCount / (5000f / (zoomLevel + 2));
 
         int redMin = 0;
         int greenMin = 46;
