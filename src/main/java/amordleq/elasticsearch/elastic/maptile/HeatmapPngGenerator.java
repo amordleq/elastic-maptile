@@ -125,7 +125,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         }
 
         public int scaleY(OffsetBox offsetBox) {
-            return Math.abs((int) (offsetBox.getOffsetY() / yScale));
+            return Math.abs((int)Math.floor(offsetBox.getOffsetY() / yScale));
         }
 
         public int scaleWidth(OffsetBox offsetBox) {
@@ -133,7 +133,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         }
 
         public int scaleHeight(OffsetBox offsetBox) {
-            return Math.abs((int) (offsetBox.getHeight() / yScale));
+            return Math.abs((int)Math.ceil(offsetBox.getHeight() / yScale));
         }
     }
 }
