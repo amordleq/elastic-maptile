@@ -8,22 +8,10 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.data.elasticsearch.client.ClientConfiguration;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveRestClients;
-import org.springframework.http.MediaType;
 import org.springframework.web.reactive.function.client.ExchangeStrategies;
-import org.springframework.web.reactive.function.server.RequestPredicates;
-import org.springframework.web.reactive.function.server.RouterFunction;
-import org.springframework.web.reactive.function.server.RouterFunctions;
-import org.springframework.web.reactive.function.server.ServerResponse;
 
 @Configuration
 public class Config {
-
-    @Bean
-    RouterFunction<ServerResponse> router(MapTileHandler handler) {
-        return RouterFunctions.route()
-                .GET("/{z}/{x}/{y}.png", RequestPredicates.accept(MediaType.IMAGE_PNG), handler::getTile)
-                .build();
-    }
 
     @Bean
     ReactiveElasticsearchClient client() {
