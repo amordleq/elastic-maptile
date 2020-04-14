@@ -9,6 +9,13 @@ public class BoundingBox {
     double east;
     double west;
 
+    BoundingBox(double north, double west, double south, double east) {
+        this.north = north;
+        this.west = west;
+        this.south = south;
+        this.east = east;
+    }
+
     BoundingBox(MapTileCoordinates mapTileCoordinates) {
         this(mapTileCoordinates.getX(), mapTileCoordinates.getY(), mapTileCoordinates.getZ());
     }
