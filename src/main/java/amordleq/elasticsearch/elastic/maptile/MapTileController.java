@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 @RestController
-public class MapController {
+public class MapTileController {
 
     @Autowired
     MapTileGenerator generator;
