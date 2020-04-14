@@ -2,6 +2,9 @@ package amordleq.elasticsearch.elastic.maptile;
 
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.BoolQueryBuilder;
+import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
+import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.aggregations.AggregationBuilders;
 import org.elasticsearch.search.aggregations.bucket.geogrid.GeoTileGridAggregationBuilder;
@@ -31,13 +34,17 @@ public class MapTileGenerator {
     @Autowired
     PngGenerator pngGenerator;
 
-    Mono<byte[]> generateTileMap(final MapTileCoordinates coordinates) {
-        return findGrid(coordinates)
+    public Mono<byte[]> generateTileMap(final MapTileCoordinates coordinates) {
+        return generateTileMap(coordinates, null);
+    }
+
+    public Mono<byte[]> generateTileMap(final MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        return findGrid(coordinates, additionalFilter)
                 .as(this::createTilePng);
     }
 
-    Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates) {
-        return queryElasticsearch(coordinates)
+    Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        return queryElasticsearch(coordinates, additionalFilter)
                 .flatMapMany(searchResponse -> Flux.just(searchResponse.getAggregations().get("agg")))
                 .name("elastic-aggregation")
                 .metrics()
@@ -54,11 +61,12 @@ public class MapTileGenerator {
     }
 
     Mono<SearchResponse> queryElasticsearch(MapTileCoordinates coordinates) {
-        BoundingBox boundingBox = new BoundingBox(coordinates);
+        return queryElasticsearch(coordinates, null);
+    }
+
+    Mono<SearchResponse> queryElasticsearch(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        searchSourceBuilder.query(
-                QueryBuilders.geoBoundingBoxQuery("location")
-                        .setCorners(boundingBox.getNorth(), boundingBox.getWest(), boundingBox.getSouth(), boundingBox.getEast()));
+        searchSourceBuilder.query(createQuery(coordinates, additionalFilter));
         searchSourceBuilder.size(0);
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
@@ -70,6 +78,20 @@ public class MapTileGenerator {
 
         searchRequest.source(searchSourceBuilder);
         return reactiveRestHighLevelClient.search(searchRequest);
+    }
+
+    private QueryBuilder createQuery(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        BoolQueryBuilder searchQuery = QueryBuilders.boolQuery()
+                .filter(geoQuery(coordinates));
+        if(additionalFilter != null) {
+            searchQuery.filter(additionalFilter);
+        }
+        return searchQuery;
+    }
+
+    private GeoBoundingBoxQueryBuilder geoQuery(MapTileCoordinates coordinates) {
+        BoundingBox boundingBox = new BoundingBox(coordinates);
+        return QueryBuilders.geoBoundingBoxQuery("location").setCorners(boundingBox.getNorth(), boundingBox.getWest(), boundingBox.getSouth(), boundingBox.getEast());
     }
 
 }
