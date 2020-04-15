@@ -16,6 +16,8 @@ import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.time.Duration;
+
 @Component
 public class MapTileGenerator {
 
@@ -77,7 +79,8 @@ public class MapTileGenerator {
         SearchRequest searchRequest = new SearchRequest("cell-towers");
 
         searchRequest.source(searchSourceBuilder);
-        return reactiveRestHighLevelClient.search(searchRequest);
+        return reactiveRestHighLevelClient.search(searchRequest)
+                .retryBackoff(2, Duration.ofMillis(250));
     }
 
     private QueryBuilder createQuery(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
