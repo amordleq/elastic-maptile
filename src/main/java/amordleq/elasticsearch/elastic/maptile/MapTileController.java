@@ -2,6 +2,7 @@ package amordleq.elasticsearch.elastic.maptile;
 
 import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
@@ -14,7 +15,7 @@ public class MapTileController {
     @Autowired
     CountProvider countProvider;
 
-    @RequestMapping(path="/{z}/{x}/{y}.png", produces = "image/png")
+    @RequestMapping(path="/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public Mono<byte[]> getTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
         MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
@@ -25,7 +26,7 @@ public class MapTileController {
         }
     }
 
-    @RequestMapping(path="/count-all", produces = "text/plain")
+    @RequestMapping(path="/count-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Mono<Long> countAll(@RequestParam(required = false) String filter) {
         if (filter != null && !filter.isEmpty()) {
@@ -35,7 +36,7 @@ public class MapTileController {
         }
     }
 
-    @RequestMapping(path="/count-region", produces = "text/plain")
+    @RequestMapping(path="/count-region", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Mono<Long> countInRegion(@RequestParam double north, @RequestParam double west, @RequestParam double south, @RequestParam double east, @RequestParam(required = false) String filter) {
         BoundingBox boundingBox = new BoundingBox(north, west, south, east);
