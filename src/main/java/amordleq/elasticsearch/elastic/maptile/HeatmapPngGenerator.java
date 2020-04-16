@@ -31,7 +31,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         Graphics2D g2d = img.createGraphics();
         g2d.setComposite(AlphaComposite.Clear);
         g2d.fillRect(0, 0, 256, 256);
-        g2d.setComposite(AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.8f));
+        g2d.setComposite(AlphaComposite.SrcOver);
 
         LOG.trace("Tile bounds are: {},{},{},{}", tileBoundingBox.getNorth(), tileBoundingBox.getWest(), tileBoundingBox.getSouth(), tileBoundingBox.getEast());
 
@@ -80,12 +80,12 @@ public class HeatmapPngGenerator implements PngGenerator {
         long docCount = bucket.getDocCount();
         double intensityScale = docCount / (5000f / (zoomLevel + 2));
 
-        int redMin = 0;
-        int greenMin = 46;
-        int blueMin = 120;
+        int redMin = 8;
+        int greenMin = 48;
+        int blueMin = 107;
 
-        int redMax = 207;
-        int greenMax = 255;
+        int redMax = 247;
+        int greenMax = 251;
         int blueMax = 255;
 
         int red = (int) (((redMax - redMin) * intensityScale) + redMin);
