@@ -24,7 +24,7 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     @Override
     public Mono<byte[]> generatePng(MapTileGrid mapTileGrid) {
-        BoundingBox tileBoundingBox = new BoundingBox(mapTileGrid.getCoordinates());
+        BoundingBox tileBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(new BoundingBox(mapTileGrid.getCoordinates()));
         Scale scale = new Scale(tileBoundingBox, 256);
 
         BufferedImage img = new BufferedImage(256, 256, BufferedImage.TYPE_INT_ARGB);
@@ -43,7 +43,7 @@ public class HeatmapPngGenerator implements PngGenerator {
     }
 
     private void writeToGraphics(Graphics2D g2d, GeoGrid.Bucket bucket, BoundingBox tileBoundingBox, Scale scale, int z) {
-        BoundingBox bucketBoundingBox = createBoundingBoxFromBucket(bucket);
+        BoundingBox bucketBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(createBoundingBoxFromBucket(bucket));
         LOG.trace("Bucket bounds are:{},{},{},{}", bucketBoundingBox.getNorth(), bucketBoundingBox.getWest(), bucketBoundingBox.getSouth(), bucketBoundingBox.getEast());
 
         OffsetBox offsetBox = new OffsetBox(bucketBoundingBox, tileBoundingBox);
@@ -121,19 +121,19 @@ public class HeatmapPngGenerator implements PngGenerator {
         }
 
         public int scaleX(OffsetBox offsetBox) {
-            return Math.abs((int) (offsetBox.getOffsetX() / xScale));
+            return Math.abs((int) Math.round(offsetBox.getOffsetX() / xScale));
         }
 
         public int scaleY(OffsetBox offsetBox) {
-            return Math.abs((int)Math.floor(offsetBox.getOffsetY() / yScale));
+            return Math.abs((int) Math.round(offsetBox.getOffsetY() / yScale));
         }
 
         public int scaleWidth(OffsetBox offsetBox) {
-            return Math.abs((int) (offsetBox.getWidth() / xScale));
+            return Math.abs((int) Math.round(offsetBox.getWidth() / xScale));
         }
 
         public int scaleHeight(OffsetBox offsetBox) {
-            return Math.abs((int)Math.ceil(offsetBox.getHeight() / yScale));
+            return Math.abs((int) Math.round(offsetBox.getHeight() / yScale));
         }
     }
 }
