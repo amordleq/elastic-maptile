@@ -5,8 +5,6 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.client.core.CountRequest;
-import org.elasticsearch.client.core.CountResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -19,21 +17,12 @@ public class ReactiveRestHighLevelClient {
     @Autowired
     RestHighLevelClient restHighLevelClient;
 
-    public Mono<CountResponse> count(final CountRequest countRequest) {
-        return Mono.create(sink -> {
-            restHighLevelClient.countAsync(countRequest, RequestOptions.DEFAULT, new ActionListener<CountResponse>() {
-                @Override
-                public void onResponse(CountResponse countResponse) { sink.success(countResponse); }
-
-                @Override
-                public void onFailure(Exception e) { sink.error(e); }
-            });
-        });
-    }
-
+    // FIXME: i believe this doesn't work nearly as well as i'd hoped.  see MapTileGeneratorTests for the discussion on
+    // why blockhound isn't working for the MapTileGenerator.  i think we may be bounded here by a different thread pool
+    // by virtue of relying on restHighLevelClient.searchAsync().
     public Mono<SearchResponse> search(final SearchRequest searchRequest) {
         return Mono.create(sink -> {
-                restHighLevelClient.searchAsync(searchRequest, RequestOptions.DEFAULT, new ActionListener<SearchResponse>() {
+            restHighLevelClient.searchAsync(searchRequest, RequestOptions.DEFAULT, new ActionListener<SearchResponse>() {
                     @Override
                     public void onResponse(SearchResponse searchResponse) { sink.success(searchResponse); }
 

@@ -6,6 +6,8 @@ import org.elasticsearch.rest.RestStatus
 import org.elasticsearch.search.aggregations.bucket.geogrid.ParsedGeoTileGrid
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import reactor.blockhound.BlockHound
+import reactor.core.publisher.Hooks
 import spock.lang.Specification
 
 @SpringBootTest
@@ -13,6 +15,28 @@ class MapTileGeneratorTests extends Specification {
 
     @Autowired
     MapTileGenerator mapTileGenerator
+
+    def setupSpec() {
+        Hooks.onOperatorDebug()
+        BlockHound.install(new CustomizeBlockHoundForElasticSearch())
+    }
+
+    // FIXME: this test isn't actually doing what you might expect.  the problem
+    // is that the custom reactive es client ends up causing things to happen on a
+    // different thread pool (presumably because of how it's wrapping the async
+    // calls from the standard es high level client).  so anything downstream
+    // of that mono creation won't be properly checked because it won't be happening
+    // on a thread blockhound knows is non-blocking.
+    def "verify sunny day case contains no blocking calls"() {
+        given:
+        MapTileCoordinates coordinates = new MapTileCoordinates(1, 2, 3);
+
+        when:
+        mapTileGenerator.queryElasticsearch(coordinates).block()
+
+        then:
+        notThrown(Exception.class)
+    }
 
     def "elastic search query can be issued based on map tile coordinates"() {
         given:
@@ -25,7 +49,7 @@ class MapTileGeneratorTests extends Specification {
         response.status() == RestStatus.OK
         response.aggregations
         response.aggregations.get("agg") instanceof ParsedGeoTileGrid
-        ((ParsedGeoTileGrid)response.aggregations.get("agg")).getBuckets().size() == 4797
+        ((ParsedGeoTileGrid) response.aggregations.get("agg")).getBuckets().size() == 4797
     }
 
     def "elasticsearch query can be limited with an additional filter"() {
@@ -42,6 +66,7 @@ class MapTileGeneratorTests extends Specification {
         response.status() == RestStatus.OK
         response.aggregations
         response.aggregations.get("agg") instanceof ParsedGeoTileGrid
-        ((ParsedGeoTileGrid)response.aggregations.get("agg")).getBuckets().size() == 2920
+        ((ParsedGeoTileGrid) response.aggregations.get("agg")).getBuckets().size() == 2920
     }
+
 }

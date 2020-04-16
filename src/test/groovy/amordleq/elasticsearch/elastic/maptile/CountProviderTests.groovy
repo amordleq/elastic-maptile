@@ -4,6 +4,8 @@ import org.elasticsearch.index.query.QueryBuilder
 import org.elasticsearch.index.query.QueryBuilders
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import reactor.blockhound.BlockHound
+import reactor.core.publisher.Hooks
 import reactor.core.publisher.Mono
 import spock.lang.Specification
 
@@ -12,6 +14,22 @@ class CountProviderTests extends Specification {
 
     @Autowired
     CountProvider countProvider
+
+    def setupSpec() {
+        Hooks.onOperatorDebug()
+        BlockHound.install(new CustomizeBlockHoundForElasticSearch())
+    }
+
+    def "verify sunny day case contains no blocking calls"() {
+        given:
+        Mono underTest = countProvider.countAll()
+
+        when:
+        underTest.block()
+
+        then:
+        notThrown(Exception.class)
+    }
 
     def "can count all documents"() {
         expect:
