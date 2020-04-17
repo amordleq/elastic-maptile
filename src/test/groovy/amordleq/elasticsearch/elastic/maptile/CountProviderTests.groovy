@@ -15,6 +15,11 @@ class CountProviderTests extends Specification {
     @Autowired
     CountProvider countProvider
 
+    def setupSpec() {
+        Hooks.onOperatorDebug()
+        BlockHound.install(new CustomizeBlockHoundForEnvironment())
+    }
+
     def "verify sunny day case contains no blocking calls"() {
         given:
         Mono underTest = countProvider.countAll()

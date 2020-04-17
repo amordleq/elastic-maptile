@@ -24,6 +24,9 @@ configurations {
 test {
 	jvmArgs '-XX:+AllowRedefinitionToAddDeleteMethods'
 	useJUnitPlatform()
+	testLogging {
+		events "passed", "skipped", "failed"
+	}
 }
 
 repositories {
@@ -55,3 +58,5 @@ dependencies {
 	testImplementation "org.spockframework:spock-core"
 	testImplementation "org.spockframework:spock-spring"
 }
+
+
