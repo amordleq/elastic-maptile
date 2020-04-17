@@ -21,6 +21,11 @@ configurations {
 	}
 }
 
+test {
+	jvmArgs '-XX:+AllowRedefinitionToAddDeleteMethods'
+	useJUnitPlatform()
+}
+
 repositories {
 	mavenCentral()
 }

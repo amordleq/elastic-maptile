@@ -1,11 +1,13 @@
 package amordleq.elasticsearch.elastic.maptile
 
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import javax.swing.ImageIcon
 import javax.swing.JFrame
 import javax.swing.JLabel
 
+@Ignore
 class SimpleCountPngGeneratorTests extends Specification {
 
     SimpleCountPngGenerator generator = new SimpleCountPngGenerator()

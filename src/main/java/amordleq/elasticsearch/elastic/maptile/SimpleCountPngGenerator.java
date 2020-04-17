@@ -4,7 +4,6 @@ import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
-import reactor.core.publisher.Mono;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -17,12 +16,12 @@ import java.io.IOException;
 public class SimpleCountPngGenerator implements PngGenerator {
 
     @Override
-    public Mono<byte[]> generatePng(MapTileGrid response) {
+    public byte[] generatePng(MapTileGrid response) {
         try {
             Long totalCount = response.getGrid().getBuckets().stream()
                     .map(MultiBucketsAggregation.Bucket::getDocCount)
                     .reduce(0L, Long::sum);
-            return Mono.just(generatePng(totalCount));
+            return generatePng(totalCount);
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         }

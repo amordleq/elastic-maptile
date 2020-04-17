@@ -7,7 +7,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
-import reactor.core.publisher.Mono;
 
 import javax.imageio.ImageIO;
 import java.awt.*;
@@ -23,7 +22,7 @@ public class HeatmapPngGenerator implements PngGenerator {
     private static final Logger LOG = LoggerFactory.getLogger(HeatmapPngGenerator.class);
 
     @Override
-    public Mono<byte[]> generatePng(MapTileGrid mapTileGrid) {
+    public byte[] generatePng(MapTileGrid mapTileGrid) {
         BoundingBox tileBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(new BoundingBox(mapTileGrid.getCoordinates()));
         Scale scale = new Scale(tileBoundingBox, 256);
 
@@ -39,7 +38,7 @@ public class HeatmapPngGenerator implements PngGenerator {
             writeToGraphics(g2d, bucket, tileBoundingBox, scale, mapTileGrid.getCoordinates().getZ());
         }
 
-        return Mono.just(imageToByteArray(img));
+        return imageToByteArray(img);
     }
 
     private void writeToGraphics(Graphics2D g2d, GeoGrid.Bucket bucket, BoundingBox tileBoundingBox, Scale scale, int z) {

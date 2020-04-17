@@ -2,10 +2,12 @@ package amordleq.elasticsearch.elastic.maptile
 
 import reactor.blockhound.BlockHound
 import reactor.core.publisher.Mono
+import spock.lang.Ignore
 import spock.lang.Specification
 
 import java.time.Duration
 
+@Ignore
 class BlockHoundInstallationTests extends Specification {
 
     def setupSpec() {

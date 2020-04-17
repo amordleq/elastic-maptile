@@ -5,7 +5,6 @@ import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
-import reactor.core.publisher.Mono;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -19,9 +18,9 @@ public class TestPngGenerator implements PngGenerator{
 
 
     @Override
-    public Mono<byte[]> generatePng(MapTileGrid mapTileGrid) {
+    public byte[] generatePng(MapTileGrid mapTileGrid) {
         try {
-            return Mono.just(Files.readAllBytes(Paths.get(testTile.getURI())));
+            return Files.readAllBytes(Paths.get(testTile.getURI()));
         } catch (IOException e) {
             throw Exceptions.propagate(e);
         }

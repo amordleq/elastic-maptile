@@ -57,7 +57,7 @@ public class MapTileGenerator {
 
     Mono<byte[]> createTilePng(Mono<MapTileGrid> mapTileGrid) {
         return mapTileGrid
-                .flatMap(grid -> pngGenerator.generatePng(grid))
+                .map(grid -> pngGenerator.generatePng(grid))
                 .name("tile-generation")
                 .metrics();
     }
