@@ -5,6 +5,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.GeoBoundingBoxQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
@@ -12,11 +13,8 @@ import reactor.core.publisher.Mono;
 @Component
 public class CountProvider {
 
-    ReactiveElasticsearchClient elasticsearchClient;
-
-    public CountProvider(ReactiveElasticsearchClient elasticsearchClient) {
-        this.elasticsearchClient = elasticsearchClient;
-    }
+    @Autowired
+    private ReactiveElasticsearchClient elasticsearchClient;
 
     public Mono<Long> countInRegion(BoundingBox boundingBox) {
         return countInRegion(boundingBox, null);

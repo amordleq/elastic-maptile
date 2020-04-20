@@ -28,7 +28,7 @@ public class MapTileGenerator {
 //    ReactiveElasticsearchClient elasticsearchClient;
 
     @Autowired
-    ReactiveRestHighLevelClient reactiveRestHighLevelClient;
+    private ReactiveRestHighLevelClient reactiveRestHighLevelClient;
 
     @Value("${elastic.maptile.granularityStep}")
     int granularityStep;

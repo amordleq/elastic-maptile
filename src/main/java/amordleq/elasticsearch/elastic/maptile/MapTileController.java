@@ -4,6 +4,7 @@ import org.elasticsearch.index.query.QueryBuilders;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RestController
@@ -15,7 +16,10 @@ public class MapTileController {
     @Autowired
     CountProvider countProvider;
 
-    @RequestMapping(path="/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
+    @Autowired
+    CellTowerProvider cellTowerProvider;
+
+    @RequestMapping(path = "/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public Mono<byte[]> getTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
         MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
@@ -26,7 +30,7 @@ public class MapTileController {
         }
     }
 
-    @RequestMapping(path="/count-all", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/count-all", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
     public Mono<Long> countAll(@RequestParam(required = false) String filter) {
         if (filter != null && !filter.isEmpty()) {
@@ -36,14 +40,27 @@ public class MapTileController {
         }
     }
 
-    @RequestMapping(path="/count-region", produces = MediaType.APPLICATION_JSON_VALUE)
+    @RequestMapping(path = "/count-region", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Mono<Long> countInRegion(@RequestParam double north, @RequestParam double west, @RequestParam double south, @RequestParam double east, @RequestParam(required = false) String filter) {
+    public Mono<Long> countInRegion(@RequestParam double north, @RequestParam double west,
+                                    @RequestParam double south, @RequestParam double east,
+                                    @RequestParam(required = false) String filter) {
         BoundingBox boundingBox = new BoundingBox(north, west, south, east);
         if (filter != null && !filter.isEmpty()) {
             return countProvider.countInRegion(boundingBox, QueryBuilders.wrapperQuery(filter));
         } else {
             return countProvider.countInRegion(boundingBox);
+        }
+    }
+
+    @RequestMapping(path = "/cell-towers", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    @ResponseBody
+    public Flux<CellTower> getCellTowersNear(@RequestParam double latitude, @RequestParam double longitude, @RequestParam String distance,
+                                             @RequestParam(required = false) String filter, @RequestParam(required = false) Integer maxResults) {
+        if (filter != null && !filter.isEmpty()) {
+            return cellTowerProvider.findNear(latitude, longitude, distance, QueryBuilders.wrapperQuery(filter), maxResults);
+        } else {
+            return cellTowerProvider.findNear(latitude, longitude, distance, null, maxResults);
         }
     }
 }
