@@ -36,7 +36,7 @@ public class CellTowerProvider {
 
         NativeSearchQueryBuilder queryBuilder = new NativeSearchQueryBuilder().withQuery(searchQuery);
         if (maximumNumberOfResults != null && maximumNumberOfResults > 0) {
-            queryBuilder.withPageable(PageRequest.of(0, maximumNumberOfResults));
+            queryBuilder.withPageable(PageRequest.of(0, maximumNumberOfResults)); // FIXME: use query.setMaxResults() in future when available
         }
 
         return elasticsearchTemplate.find(queryBuilder.build(), CellTower.class)
