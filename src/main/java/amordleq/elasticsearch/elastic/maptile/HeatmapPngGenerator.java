@@ -21,6 +21,11 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(HeatmapPngGenerator.class);
 
+    @org.springframework.beans.factory.annotation.Value("${elastic.maptile.granularityStep}")
+    private int granularityStep;
+
+    private BluesColorScheme colorScheme = new BluesColorScheme();
+
     @Override
     public byte[] generatePng(MapTileGrid mapTileGrid) {
         BoundingBox tileBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(new BoundingBox(mapTileGrid.getCoordinates()));
@@ -77,21 +82,53 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     private Color calculateColorForBucket(GeoGrid.Bucket bucket, int zoomLevel) {
         long docCount = bucket.getDocCount();
-        double intensityScale = docCount / (5000f / (zoomLevel + 2));
+        long maxDocCount = getMaxDocCountForZoomLevel(zoomLevel);
+        double intensityScale = Math.log(docCount) / Math.log(maxDocCount);
+        return colorScheme.getColor(intensityScale);
+    }
 
-        int redMin = 8;
-        int greenMin = 48;
-        int blueMin = 107;
+    // TODO Not sure what to do with this. Obviously it's very cell tower-specific, so it doesn't belong here.
+    // It would be nice if we could ask the database for these values.
+    private long getMaxDocCountForZoomLevel(int zoomLevel) {
+        int bucketZoomLevel = zoomLevel + granularityStep;
 
-        int redMax = 247;
-        int greenMax = 251;
-        int blueMax = 255;
+        switch (bucketZoomLevel) {
+            case 7:
+                return 590000;
 
-        int red = (int) (((redMax - redMin) * intensityScale) + redMin);
-        int green = (int) (((greenMax - greenMin) * intensityScale) + greenMin);
-        int blue = (int) (((blueMax - blueMin) * intensityScale) + blueMin);
+            case 8:
+                return 480000;
 
-        return new Color(Math.min(red, 255), Math.min(green, 255), Math.min(blue, 255));
+            case 9:
+                return 350000;
+
+            case 10:
+                return 220000;
+
+            case 11:
+                return 158000;
+
+            case 12:
+                return 66000;
+
+            case 13:
+                return 25000;
+
+            case 14:
+                return 9700;
+
+            case 15:
+                return 4900;
+
+            case 16:
+                return 2000;
+
+            case 17:
+                return 800;
+
+            default:
+                return 720;
+        }
     }
 
     @Value
