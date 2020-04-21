@@ -42,13 +42,19 @@ public class MapTileGenerator {
 
     public Mono<byte[]> generateTileMap(final MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
         ColorScheme colorScheme = new BluesColorScheme(coordinates.getZ(), granularityStep);
-
-        return findGrid(coordinates, additionalFilter)
+        return findGrid(coordinates, null, additionalFilter)
                 .as(mapTileGridMono -> createTilePng(mapTileGridMono, colorScheme));
     }
 
-    Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
-        return queryElasticsearch(coordinates, additionalFilter)
+    // FIXME: maybe not the best generic design, but playing with possibilities here
+    public Mono<byte[]> generateMccTileMap(final MapTileCoordinates coordinates, final QueryBuilder additionalFilter) {
+        ColorScheme colorScheme = new MccColorScheme();
+        return findGrid(coordinates, "mcc", additionalFilter)
+                .as(mapTileGridMono -> createTilePng(mapTileGridMono, colorScheme));
+    }
+
+    Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates, String termFieldSubAggregation, QueryBuilder additionalFilter) {
+        return queryElasticsearch(coordinates, termFieldSubAggregation, additionalFilter)
                 .flatMapMany(searchResponse -> Flux.just(searchResponse.getAggregations().get("agg")))
                 .name("elastic-aggregation")
                 .metrics()
@@ -69,6 +75,10 @@ public class MapTileGenerator {
     }
 
     Mono<SearchResponse> queryElasticsearch(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        return queryElasticsearch(coordinates, null, additionalFilter);
+    }
+
+    Mono<SearchResponse> queryElasticsearch(MapTileCoordinates coordinates, String termFieldSubAggregation, QueryBuilder additionalFilter) {
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
         searchSourceBuilder.query(createQuery(coordinates, additionalFilter));
         searchSourceBuilder.size(0);
@@ -76,6 +86,11 @@ public class MapTileGenerator {
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
         aggregrationBuilder.field("location").precision(coordinates.getZ() + granularityStep);
         aggregrationBuilder.size(500000);
+
+        if (termFieldSubAggregation != null) {
+            aggregrationBuilder.subAggregation(AggregationBuilders.terms(termFieldSubAggregation).field(termFieldSubAggregation));
+        }
+
         searchSourceBuilder.aggregation(aggregrationBuilder);
 
         SearchRequest searchRequest = new SearchRequest("cell-towers");
