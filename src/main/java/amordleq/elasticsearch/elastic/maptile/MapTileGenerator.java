@@ -41,8 +41,10 @@ public class MapTileGenerator {
     }
 
     public Mono<byte[]> generateTileMap(final MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        ColorScheme colorScheme = new BluesColorScheme(coordinates.getZ(), granularityStep);
+
         return findGrid(coordinates, additionalFilter)
-                .as(this::createTilePng);
+                .as(mapTileGridMono -> createTilePng(mapTileGridMono, colorScheme));
     }
 
     Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
@@ -55,9 +57,9 @@ public class MapTileGenerator {
                 .map(grid -> new MapTileGrid(coordinates, grid));
     }
 
-    Mono<byte[]> createTilePng(Mono<MapTileGrid> mapTileGrid) {
+    Mono<byte[]> createTilePng(Mono<MapTileGrid> mapTileGrid, ColorScheme colorScheme) {
         return mapTileGrid
-                .map(grid -> pngGenerator.generatePng(grid))
+                .map(grid -> pngGenerator.generatePng(grid, colorScheme))
                 .name("tile-generation")
                 .metrics();
     }

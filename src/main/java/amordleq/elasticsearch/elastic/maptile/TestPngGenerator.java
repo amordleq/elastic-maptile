@@ -18,7 +18,7 @@ public class TestPngGenerator implements PngGenerator{
 
 
     @Override
-    public byte[] generatePng(MapTileGrid mapTileGrid) {
+    public byte[] generatePng(MapTileGrid mapTileGrid, ColorScheme colorScheme) {
         try {
             return Files.readAllBytes(Paths.get(testTile.getURI()));
         } catch (IOException e) {

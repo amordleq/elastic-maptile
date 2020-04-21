@@ -27,7 +27,7 @@ class HeatmapPngGeneratorTests extends Specification {
         bucket.getKeyAsString() >> "5/2/4"
 
         expect:
-        JFrame frame = showImage(generator.generatePng(new MapTileGrid(new MapTileCoordinates(tileX, tileY, tileZ), geoGrid)));
+        JFrame frame = showImage(generator.generatePng(new MapTileGrid(new MapTileCoordinates(tileX, tileY, tileZ), geoGrid), null));
         while(frame?.visible) {
             sleep(1000);
         }

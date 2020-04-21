@@ -16,7 +16,7 @@ import java.io.IOException;
 public class SimpleCountPngGenerator implements PngGenerator {
 
     @Override
-    public byte[] generatePng(MapTileGrid response) {
+    public byte[] generatePng(MapTileGrid response, ColorScheme colorScheme) {
         try {
             Long totalCount = response.getGrid().getBuckets().stream()
                     .map(MultiBucketsAggregation.Bucket::getDocCount)

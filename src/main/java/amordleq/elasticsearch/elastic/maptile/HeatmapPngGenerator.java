@@ -21,13 +21,8 @@ public class HeatmapPngGenerator implements PngGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(HeatmapPngGenerator.class);
 
-    @org.springframework.beans.factory.annotation.Value("${elastic.maptile.granularityStep}")
-    private int granularityStep;
-
-    private BluesColorScheme colorScheme = new BluesColorScheme();
-
     @Override
-    public byte[] generatePng(MapTileGrid mapTileGrid) {
+    public byte[] generatePng(MapTileGrid mapTileGrid, ColorScheme colorScheme) {
         BoundingBox tileBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(new BoundingBox(mapTileGrid.getCoordinates()));
         Scale scale = new Scale(tileBoundingBox, 256);
 
@@ -40,13 +35,13 @@ public class HeatmapPngGenerator implements PngGenerator {
         LOG.trace("Tile bounds are: {},{},{},{}", tileBoundingBox.getNorth(), tileBoundingBox.getWest(), tileBoundingBox.getSouth(), tileBoundingBox.getEast());
 
         for (GeoGrid.Bucket bucket : mapTileGrid.getGrid().getBuckets()) {
-            writeToGraphics(g2d, bucket, tileBoundingBox, scale, mapTileGrid.getCoordinates().getZ());
+            writeToGraphics(g2d, bucket, tileBoundingBox, scale, colorScheme);
         }
 
         return imageToByteArray(img);
     }
 
-    private void writeToGraphics(Graphics2D g2d, GeoGrid.Bucket bucket, BoundingBox tileBoundingBox, Scale scale, int z) {
+    private void writeToGraphics(Graphics2D g2d, GeoGrid.Bucket bucket, BoundingBox tileBoundingBox, Scale scale, ColorScheme colorScheme) {
         BoundingBox bucketBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(createBoundingBoxFromBucket(bucket));
         LOG.trace("Bucket bounds are:{},{},{},{}", bucketBoundingBox.getNorth(), bucketBoundingBox.getWest(), bucketBoundingBox.getSouth(), bucketBoundingBox.getEast());
 
@@ -54,7 +49,7 @@ public class HeatmapPngGenerator implements PngGenerator {
         LOG.trace("Offset:{}/{}", offsetBox.getOffsetX(), offsetBox.getOffsetY());
         LOG.trace("Extent:{}/{}", offsetBox.getWidth(), offsetBox.getHeight());
 
-        g2d.setColor(calculateColorForBucket(bucket, z));
+        g2d.setColor(colorScheme.getColor(bucket));
         g2d.fillRect(scale.scaleX(offsetBox), scale.scaleY(offsetBox), scale.scaleWidth(offsetBox), scale.scaleHeight(offsetBox));
     }
 
@@ -78,57 +73,6 @@ public class HeatmapPngGenerator implements PngGenerator {
         int bucketX = Integer.parseInt(zxy[1]);
         int bucketY = Integer.parseInt(zxy[2]);
         return new BoundingBox(bucketX, bucketY, bucketZ);
-    }
-
-    private Color calculateColorForBucket(GeoGrid.Bucket bucket, int zoomLevel) {
-        long docCount = bucket.getDocCount();
-        long maxDocCount = getMaxDocCountForZoomLevel(zoomLevel);
-        double intensityScale = Math.log(docCount) / Math.log(maxDocCount);
-        return colorScheme.getColor(intensityScale);
-    }
-
-    // TODO Not sure what to do with this. Obviously it's very cell tower-specific, so it doesn't belong here.
-    // It would be nice if we could ask the database for these values.
-    private long getMaxDocCountForZoomLevel(int zoomLevel) {
-        int bucketZoomLevel = zoomLevel + granularityStep;
-
-        switch (bucketZoomLevel) {
-            case 7:
-                return 590000;
-
-            case 8:
-                return 480000;
-
-            case 9:
-                return 350000;
-
-            case 10:
-                return 220000;
-
-            case 11:
-                return 158000;
-
-            case 12:
-                return 66000;
-
-            case 13:
-                return 25000;
-
-            case 14:
-                return 9700;
-
-            case 15:
-                return 4900;
-
-            case 16:
-                return 2000;
-
-            case 17:
-                return 800;
-
-            default:
-                return 720;
-        }
     }
 
     @Value
