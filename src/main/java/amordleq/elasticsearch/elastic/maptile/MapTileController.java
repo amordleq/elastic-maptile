@@ -17,12 +17,6 @@ public class MapTileController {
     @Autowired
     CellTowerRepositoryImpl cellTowerRepository;
 
-    @RequestMapping(path = "/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
-    @ResponseBody
-    public Mono<byte[]> getTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
-        return getHeatmapTile(z, x, y, filter);
-    }
-
     @RequestMapping(path = "/heatmap/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public Mono<byte[]> getHeatmapTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
