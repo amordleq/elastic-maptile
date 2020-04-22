@@ -88,7 +88,7 @@ public class CellTowerRepositoryImpl implements CellTowerRepository {
         searchSourceBuilder.size(0);
 
         GeoTileGridAggregationBuilder aggregrationBuilder = AggregationBuilders.geotileGrid("agg");
-        aggregrationBuilder.field("location").precision(coordinates.getZ() + granularityStep);
+        aggregrationBuilder.field("location").precision(calculatePrecision(coordinates));
         aggregrationBuilder.size(500000);
 
         if (termFieldSubAggregation != null) {
@@ -102,6 +102,10 @@ public class CellTowerRepositoryImpl implements CellTowerRepository {
         searchRequest.source(searchSourceBuilder);
         return reactiveRestHighLevelClient.search(searchRequest)
                 .retryBackoff(2, Duration.ofMillis(250));
+    }
+
+    private int calculatePrecision(MapTileCoordinates coordinates) {
+        return Math.min(coordinates.getZ() + granularityStep, 29);
     }
 
     private GeoDistanceQueryBuilder geoDistanceQuery(double latitude, double longitude, String distance) {
