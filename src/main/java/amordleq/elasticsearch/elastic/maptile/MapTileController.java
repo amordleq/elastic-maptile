@@ -12,7 +12,7 @@ import reactor.core.publisher.Mono;
 public class MapTileController {
 
     @Autowired
-    MapTileGenerator generator;
+    MapTileService generator;
 
     @Autowired
     CellTowerRepositoryImpl cellTowerRepository;
@@ -22,6 +22,13 @@ public class MapTileController {
     public Mono<byte[]> getHeatmapTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
         MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
         return generator.generateHeatmapTile(coordinates, nullSafeQueryBuilder(filter));
+    }
+
+    @RequestMapping(path = "/subterm/{term}/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public Mono<byte[]> getSubtermTile(@PathVariable String term, @PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
+        MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
+        return generator.generateSubTermsTile(coordinates, term, nullSafeQueryBuilder(filter));
     }
 
     @RequestMapping(path = "/count/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
