@@ -9,16 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Mono;
 
-// TODO: It would be nice to be able to use Spring's client instead of rolling my own here, but they don't seem
-// to expose a way to get at the aggregation results.
+// FIXME: this should be discarded in favor of the spring-provided client once spring-data-elasticsearch releases 4.0
 @Component
 public class ReactiveRestHighLevelClient {
 
     @Autowired
     RestHighLevelClient restHighLevelClient;
 
-    // FIXME: i believe this doesn't work nearly as well as i'd hoped.  see MapTileGeneratorTests for the discussion on
-    // why blockhound isn't working for the MapTileGenerator.  i think we may be bounded here by a different thread pool
+    // FIXME: i believe this doesn't work nearly as well as i'd hoped.  see CellTowerRepositoryTests for the discussion on
+    // why blockhound isn't working for the CellTowerRepository.  i think we may be bounded here by a different thread pool
     // by virtue of relying on restHighLevelClient.searchAsync().
     public Mono<SearchResponse> search(final SearchRequest searchRequest) {
         return Mono.create(sink -> {

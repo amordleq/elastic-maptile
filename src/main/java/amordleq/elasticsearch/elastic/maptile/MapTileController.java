@@ -14,10 +14,7 @@ public class MapTileController {
     MapTileGenerator generator;
 
     @Autowired
-    CountProvider countProvider;
-
-    @Autowired
-    CellTowerProvider cellTowerProvider;
+    CellTowerRepositoryImpl cellTowerRepository;
 
     @RequestMapping(path = "/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
@@ -34,9 +31,9 @@ public class MapTileController {
     @ResponseBody
     public Mono<Long> countAll(@RequestParam(required = false) String filter) {
         if (filter != null && !filter.isEmpty()) {
-            return countProvider.countAll(QueryBuilders.wrapperQuery(filter));
+            return cellTowerRepository.countAll(QueryBuilders.wrapperQuery(filter));
         } else {
-            return countProvider.countAll();
+            return cellTowerRepository.countAll();
         }
     }
 
@@ -47,9 +44,9 @@ public class MapTileController {
                                     @RequestParam(required = false) String filter) {
         BoundingBox boundingBox = new BoundingBox(north, west, south, east);
         if (filter != null && !filter.isEmpty()) {
-            return countProvider.countInRegion(boundingBox, QueryBuilders.wrapperQuery(filter));
+            return cellTowerRepository.countInRegion(boundingBox, QueryBuilders.wrapperQuery(filter));
         } else {
-            return countProvider.countInRegion(boundingBox);
+            return cellTowerRepository.countInRegion(boundingBox);
         }
     }
 
@@ -58,9 +55,9 @@ public class MapTileController {
     public Flux<CellTower> getCellTowersNear(@RequestParam double latitude, @RequestParam double longitude, @RequestParam String distance,
                                              @RequestParam(required = false) String filter, @RequestParam(required = false) Integer maxResults) {
         if (filter != null && !filter.isEmpty()) {
-            return cellTowerProvider.findNear(latitude, longitude, distance, QueryBuilders.wrapperQuery(filter), maxResults);
+            return cellTowerRepository.findNear(latitude, longitude, distance, QueryBuilders.wrapperQuery(filter), maxResults);
         } else {
-            return cellTowerProvider.findNear(latitude, longitude, distance, null, maxResults);
+            return cellTowerRepository.findNear(latitude, longitude, distance, null, maxResults);
         }
     }
 }
