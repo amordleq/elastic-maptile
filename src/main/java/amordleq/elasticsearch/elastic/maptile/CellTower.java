@@ -13,6 +13,8 @@ public class CellTower {
     Integer cell;
     Integer range;
     String countryCode;
+    String countryName;
+    String operator;
     String status;
     Location location;
 }
