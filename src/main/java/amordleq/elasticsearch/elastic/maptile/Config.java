@@ -35,9 +35,9 @@ public class Config {
                 RestClient
                         .builder(new HttpHost("localhost", 9200))
                         .setRequestConfigCallback(config -> config
-                                .setConnectTimeout(5000)
-                                .setConnectionRequestTimeout(5000)
-                                .setSocketTimeout(5000)
+                                .setConnectTimeout(10000)
+                                .setConnectionRequestTimeout(10000)
+                                .setSocketTimeout(10000)
                         ));
     }
 }
