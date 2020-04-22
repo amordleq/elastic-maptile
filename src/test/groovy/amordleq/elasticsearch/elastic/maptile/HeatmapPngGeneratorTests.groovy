@@ -12,7 +12,7 @@ import javax.swing.JLabel
 @Ignore
 class HeatmapPngGeneratorTests extends Specification {
 
-    HeatmapPngGenerator generator = new HeatmapPngGenerator()
+    HeatmapPngGenerator generator = new HeatmapPngGenerator(new SimpleColorScheme())
 
     def "can generate a heatmap png from a geogrid"() {
         given:
@@ -27,7 +27,7 @@ class HeatmapPngGeneratorTests extends Specification {
         bucket.getKeyAsString() >> "5/2/4"
 
         expect:
-        JFrame frame = showImage(generator.generatePng(new MapTileGrid(new MapTileCoordinates(tileX, tileY, tileZ), geoGrid), null));
+        JFrame frame = showImage(generator.generatePng(new MapTileGrid(new MapTileCoordinates(tileX, tileY, tileZ), geoGrid)));
         while(frame?.visible) {
             sleep(1000);
         }

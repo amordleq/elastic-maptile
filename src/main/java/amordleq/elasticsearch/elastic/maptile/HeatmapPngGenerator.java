@@ -4,8 +4,6 @@ import lombok.Value;
 import org.elasticsearch.search.aggregations.bucket.geogrid.GeoGrid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
 
 import javax.imageio.ImageIO;
@@ -15,14 +13,18 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-@Profile("demo")
-@Component
 public class HeatmapPngGenerator implements PngGenerator {
 
     private static final Logger LOG = LoggerFactory.getLogger(HeatmapPngGenerator.class);
 
+    private final ColorScheme colorScheme;
+
+    public HeatmapPngGenerator(ColorScheme colorScheme) {
+        this.colorScheme = colorScheme;
+    }
+
     @Override
-    public byte[] generatePng(MapTileGrid mapTileGrid, ColorScheme colorScheme) {
+    public byte[] generatePng(MapTileGrid mapTileGrid) {
         BoundingBox tileBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(new BoundingBox(mapTileGrid.getCoordinates()));
         Scale scale = new Scale(tileBoundingBox, 256);
 

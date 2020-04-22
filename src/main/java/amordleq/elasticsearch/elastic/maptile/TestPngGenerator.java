@@ -1,24 +1,21 @@
 package amordleq.elasticsearch.elastic.maptile;
 
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.Profile;
 import org.springframework.core.io.Resource;
-import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
-@Profile("test")
-@Component
 public class TestPngGenerator implements PngGenerator{
-    @Value("/test.png")
-    Resource testTile;
 
+    final Resource testTile;
 
-    @Override
-    public byte[] generatePng(MapTileGrid mapTileGrid, ColorScheme colorScheme) {
+    public TestPngGenerator(Resource testTile) {
+        this.testTile = testTile;
+    }
+
+    public byte[] generatePng(MapTileGrid mapTileGrid) {
         try {
             return Files.readAllBytes(Paths.get(testTile.getURI()));
         } catch (IOException e) {

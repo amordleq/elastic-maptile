@@ -1,8 +1,6 @@
 package amordleq.elasticsearch.elastic.maptile;
 
 import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.springframework.context.annotation.Profile;
-import org.springframework.stereotype.Component;
 import reactor.core.Exceptions;
 
 import javax.imageio.ImageIO;
@@ -11,12 +9,10 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
-@Profile("simple")
-@Component
 public class SimpleCountPngGenerator implements PngGenerator {
 
     @Override
-    public byte[] generatePng(MapTileGrid response, ColorScheme colorScheme) {
+    public byte[] generatePng(MapTileGrid response) {
         try {
             Long totalCount = response.getGrid().getBuckets().stream()
                     .map(MultiBucketsAggregation.Bucket::getDocCount)
