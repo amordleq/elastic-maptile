@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
+
 @RestController
 public class MapTileController {
 
@@ -61,11 +63,12 @@ public class MapTileController {
         return cellTowerRepository.countInRegion(boundingBox, nullSafeQueryBuilder(filter));
     }
 
-    @RequestMapping(path = "/cell-towers", produces = MediaType.APPLICATION_STREAM_JSON_VALUE)
+    @RequestMapping(path = "/cell-towers", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    public Flux<CellTower> getCellTowersNear(@RequestParam double latitude, @RequestParam double longitude, @RequestParam String distance,
-                                             @RequestParam(required = false) String filter, @RequestParam(required = false) Integer maxResults) {
-        return cellTowerRepository.findNear(latitude, longitude, distance, nullSafeQueryBuilder(filter), maxResults);
+    public Mono<List<CellTower>> getCellTowersNear(@RequestParam double latitude, @RequestParam double longitude, @RequestParam String distance,
+                                                   @RequestParam(required = false) String filter, @RequestParam(required = false) Integer maxResults) {
+        return cellTowerRepository.findNear(latitude, longitude, distance, nullSafeQueryBuilder(filter), maxResults)
+                .collectList();
     }
 
     private QueryBuilder nullSafeQueryBuilder(String filter) {
