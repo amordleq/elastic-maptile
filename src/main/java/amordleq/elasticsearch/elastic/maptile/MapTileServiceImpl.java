@@ -11,38 +11,39 @@ import reactor.core.publisher.Mono;
 public class MapTileServiceImpl implements MapTileService {
 
     @Autowired
-    private CellTowerRepositoryImpl cellTowerRepository;
+    private CellTowerRepository cellTowerRepository;
 
     @Value("${elastic.maptile.granularityStep}")
-    int granularityStep;
+    private int granularityStep;
 
     @Value("/test.png")
-    Resource testTile;
+    private Resource testTileResource;
 
     @Override
     public Mono<byte[]> generateHeatmapTile(final MapTileCoordinates coordinates, final QueryBuilder additionalFilter) {
         ColorScheme colorScheme = new BluesColorScheme(coordinates.getZ(), granularityStep);
-        return findGrid(coordinates, null, additionalFilter)
-                .as(mapTileGridMono -> createTilePng(mapTileGridMono, new HeatmapPngGenerator(colorScheme)));
+        return generateTile(coordinates, null, additionalFilter, new HeatmapPngGenerator(colorScheme));
     }
 
     @Override
     public Mono<byte[]> generateCountTile(final MapTileCoordinates coordinates, final QueryBuilder additionalFilter) {
-        return findGrid(coordinates, null, additionalFilter)
-                .as(mapTileGridMono -> createTilePng(mapTileGridMono, new SimpleCountPngGenerator()));
+        return generateTile(coordinates, null, additionalFilter, new SimpleCountPngGenerator());
     }
 
     @Override
     public Mono<byte[]> generateTestTile(final MapTileCoordinates coordinates, final QueryBuilder additionalFilter) {
-        return findGrid(coordinates, null, additionalFilter)
-                .as(mapTileGridMono -> createTilePng(mapTileGridMono, new TestPngGenerator(testTile)));
+        return generateTile(coordinates, null, additionalFilter, new TestPngGenerator(testTileResource));
     }
 
     @Override
     public Mono<byte[]> generateSubTermsTile(final MapTileCoordinates coordinates, final String term, final QueryBuilder additionalFilter) {
         ColorScheme colorScheme = new LargestSubTermColorScheme();
+        return generateTile(coordinates, term, additionalFilter, new HeatmapPngGenerator(colorScheme));
+    }
+
+    private Mono<byte[]> generateTile(final MapTileCoordinates coordinates, final String term, final QueryBuilder additionalFilter, PngGenerator pngGenerator) {
         return findGrid(coordinates, term, additionalFilter)
-                .as(mapTileGridMono -> createTilePng(mapTileGridMono, new HeatmapPngGenerator(colorScheme)));
+                .as(mapTileGridMono -> createTilePng(mapTileGridMono, pngGenerator));
     }
 
     private Mono<MapTileGrid> findGrid(MapTileCoordinates coordinates, String termFieldSubAggregation, QueryBuilder additionalFilter) {
