@@ -80,7 +80,7 @@ class CellTowerRepositoryImplTests extends Specification {
 
     def "can count all documents"() {
         expect:
-        cellTowerRepository.countAll().block() == 41857886
+        cellTowerRepository.countAll(null).block() == 41857886
     }
 
     def "can count subset of documents with bounding box and filter"() {

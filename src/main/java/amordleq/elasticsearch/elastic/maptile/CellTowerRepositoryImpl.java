@@ -14,13 +14,13 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.elasticsearch.client.reactive.ReactiveElasticsearchClient;
 import org.springframework.data.elasticsearch.core.ReactiveElasticsearchTemplate;
 import org.springframework.data.elasticsearch.core.query.NativeSearchQueryBuilder;
-import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Duration;
 
-@Component
+@Repository
 public class CellTowerRepositoryImpl implements CellTowerRepository {
 
     @Autowired
@@ -36,17 +36,7 @@ public class CellTowerRepositoryImpl implements CellTowerRepository {
     int granularityStep;
 
     @Override
-    public Flux<CellTower> findNear(double latitude, double longitude, String distance) {
-        return findNear(latitude, longitude, distance, null);
-    }
-
-    @Override
-    public Flux<CellTower> findNear(double latitude, double longitude, String distance, QueryBuilder additionalFilter) {
-        return findNear(latitude, longitude, distance, additionalFilter, -1);
-    }
-
-    @Override
-    public Flux<CellTower>  findNear(double latitude, double longitude, String distance, QueryBuilder additionalFilter, Integer maximumNumberOfResults) {
+    public Flux<CellTower> findNear(double latitude, double longitude, String distance, QueryBuilder additionalFilter, Integer maximumNumberOfResults) {
         BoolQueryBuilder searchQuery = QueryBuilders.boolQuery()
                 .filter(geoDistanceQuery(latitude, longitude, distance));
         if (additionalFilter != null) {
@@ -63,20 +53,10 @@ public class CellTowerRepositoryImpl implements CellTowerRepository {
     }
 
     @Override
-    public Mono<Long> countInRegion(BoundingBox boundingBox) {
-        return countInRegion(boundingBox, null);
-    }
-
-    @Override
     public Mono<Long> countInRegion(BoundingBox boundingBox, QueryBuilder additionalFilter) {
         return queryElasticsearch(createQuery(boundingBox, additionalFilter))
                 .name("elastic-counts")
                 .metrics();
-    }
-
-    @Override
-    public Mono<Long> countAll() {
-        return countAll(null);
     }
 
     @Override

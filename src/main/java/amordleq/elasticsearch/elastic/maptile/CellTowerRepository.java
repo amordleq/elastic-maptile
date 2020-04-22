@@ -6,12 +6,20 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 public interface CellTowerRepository {
-    Flux<CellTower> findNear(double latitude, double longitude, String distance);
-    Flux<CellTower> findNear(double latitude, double longitude, String distance, QueryBuilder additionalFilter);
+
+    default Flux<CellTower> findNear(double latitude, double longitude, String distance) {
+        return findNear(latitude, longitude, distance, null);
+    }
+    default Flux<CellTower> findNear(double latitude, double longitude, String distance, QueryBuilder additionalFilter) {
+        return findNear(latitude, longitude, distance, additionalFilter, -1);
+    }
     Flux<CellTower>  findNear(double latitude, double longitude, String distance, QueryBuilder additionalFilter, Integer maximumNumberOfResults);
-    Mono<Long> countInRegion(BoundingBox boundingBox);
+
+    default Mono<Long> countInRegion(BoundingBox boundingBox) { return countInRegion(boundingBox, null); }
     public Mono<Long> countInRegion(BoundingBox boundingBox, QueryBuilder additionalFilter);
-    public Mono<Long> countAll();
+
+    default public Mono<Long> countAll() { return countAll(null); }
     public Mono<Long> countAll(QueryBuilder additionalFilter);
+
     Mono<ParsedGeoTileGrid> aggregateForGeographicalCoordinates(MapTileCoordinates coordinates, String termFieldSubAggregation, QueryBuilder additionalFilter);
 }
