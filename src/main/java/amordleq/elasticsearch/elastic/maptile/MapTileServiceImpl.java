@@ -16,7 +16,7 @@ public class MapTileServiceImpl implements MapTileService {
     @Value("${elastic.maptile.granularityStep}")
     private int granularityStep;
 
-    @Value("/test.png")
+    @Value("classpath:/test.png")
     private Resource testTileResource;
 
     @Override
