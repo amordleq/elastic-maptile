@@ -10,14 +10,16 @@ import java.util.List;
 public class LargestSubTermColorScheme implements ColorScheme {
 
     private static List<Color> availableColors = List.of(
-            new Color(27,158,119),
-            new Color(217,95,2),
-            new Color(117, 112,179),
-            new Color(231,41,138),
-            new Color(102,166,30),
-            new Color(230,171,2),
-            new Color(166,118,29),
-            new Color(180,180,180)
+            new Color(31, 119, 180),
+            new Color(255, 127, 14),
+            new Color(44, 160, 44),
+            new Color(214, 39, 40),
+            new Color(148, 103, 189),
+            new Color(140, 86, 75),
+            new Color(227, 119, 194),
+            new Color(127, 127, 127),
+            new Color(188, 189, 34),
+            new Color(23, 190, 207)
     );
 
     @Override
