@@ -9,6 +9,8 @@ public interface MapTileService {
 
     Mono<byte[]> generateCountTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
 
+    Mono<byte[]> generateCoordinatesTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
+
     Mono<byte[]> generateTestTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
 
     Mono<byte[]> generateSubTermsTile(MapTileCoordinates coordinates, String term, QueryBuilder additionalFilter);

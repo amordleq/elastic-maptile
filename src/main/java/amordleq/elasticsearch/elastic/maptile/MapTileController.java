@@ -39,6 +39,13 @@ public class MapTileController {
         return mapTileService.generateCountTile(coordinates, nullSafeQueryBuilder(filter));
     }
 
+    @RequestMapping(path = "/coordinates/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
+    @ResponseBody
+    public Mono<byte[]> getCoordinatesTiles(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
+        MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
+        return mapTileService.generateCoordinatesTile(coordinates, nullSafeQueryBuilder(filter));
+    }
+
     @RequestMapping(path = "/test/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public Mono<byte[]> getTestTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {

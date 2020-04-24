@@ -31,6 +31,11 @@ public class MapTileServiceImpl implements MapTileService {
     }
 
     @Override
+    public Mono<byte[]> generateCoordinatesTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        return generateTile(coordinates, null, additionalFilter, new TileCoordinatesPngGenerator());
+    }
+
+    @Override
     public Mono<byte[]> generateTestTile(final MapTileCoordinates coordinates, final QueryBuilder additionalFilter) {
         return generateTile(coordinates, null, additionalFilter, new TestPngGenerator(testTileResource));
     }
