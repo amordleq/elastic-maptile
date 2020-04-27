@@ -31,13 +31,13 @@ class MapTileControllerTests extends Specification {
                 .isEqualTo(expectedImage)
     }
 
-    def "can fetch count tiles"() {
+    def "can fetch debug tiles"() {
         given:
-        byte[] expectedImage = "Count".bytes
-        mapTileService.generateCountTile(_, _) >> Mono.just(expectedImage)
+        byte[] expectedImage = "Debug".bytes
+        mapTileService.generateDebugTile(_, _) >> Mono.just(expectedImage)
 
         expect:
-        webClient.get().uri('/count/3/1/2.png')
+        webClient.get().uri('/debug/3/1/2.png')
                 .exchange()
                 .expectStatus().isOk()
                 .expectHeader().contentType(MediaType.IMAGE_PNG_VALUE)
