@@ -20,6 +20,9 @@ public class BoundingBox {
         this(mapTileCoordinates.getX(), mapTileCoordinates.getY(), mapTileCoordinates.getZ());
     }
 
+    /*
+     * Original implementation from https://wiki.openstreetmap.org/wiki/Slipp_map_tilenames
+     */
     BoundingBox(final int x, final int y, final int zoom) {
         north = tile2lat(y, zoom);
         south = tile2lat(y + 1, zoom);
