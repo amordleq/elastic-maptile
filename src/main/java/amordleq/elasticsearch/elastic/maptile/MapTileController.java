@@ -2,11 +2,17 @@ package amordleq.elasticsearch.elastic.maptile;
 
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
+import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation.Bucket;
+import org.elasticsearch.search.aggregations.bucket.geogrid.ParsedGeoGrid;
+import org.elasticsearch.search.aggregations.bucket.geogrid.ParsedGeoTileGrid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -67,6 +73,17 @@ public class MapTileController {
                                     @RequestParam(required = false) String filter) {
         BoundingBox boundingBox = new BoundingBox(north, west, south, east);
         return cellTowerRepository.countInRegion(boundingBox, nullSafeQueryBuilder(filter));
+    }
+
+    @RequestMapping(path = "/aggregate-counts-for-tile", produces = MediaType.APPLICATION_JSON_VALUE)
+    @ResponseBody
+    public Mono<List<CellTowerLocationCount>> aggregateCountsForTile(@RequestParam int z, @RequestParam int x, @RequestParam int y, @RequestParam(required = false) String filter) {
+        MapTileCoordinates mapTileCoordinates = new MapTileCoordinates(x, y, z);
+        return cellTowerRepository.aggregateForGeographicalCoordinates(mapTileCoordinates, null, nullSafeQueryBuilder(filter))
+                .map(ParsedGeoGrid::getBuckets)
+                .flatMapMany(Flux::fromIterable)
+                .map(CellTowerLocationCount::new)
+                .collectList();
     }
 
     @RequestMapping(path = "/cell-towers", produces = MediaType.APPLICATION_JSON_VALUE)
