@@ -2,17 +2,13 @@ package amordleq.elasticsearch.elastic.maptile;
 
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation;
-import org.elasticsearch.search.aggregations.bucket.MultiBucketsAggregation.Bucket;
 import org.elasticsearch.search.aggregations.bucket.geogrid.ParsedGeoGrid;
-import org.elasticsearch.search.aggregations.bucket.geogrid.ParsedGeoTileGrid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -38,18 +34,11 @@ public class MapTileController {
         return mapTileService.generateSubTermsTile(coordinates, term, nullSafeQueryBuilder(filter));
     }
 
-    @RequestMapping(path = "/count/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
-    @ResponseBody
-    public Mono<byte[]> getCountTile(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
-        MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
-        return mapTileService.generateCountTile(coordinates, nullSafeQueryBuilder(filter));
-    }
-
-    @RequestMapping(path = "/coordinates/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
+    @RequestMapping(path = "/debug/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)
     @ResponseBody
     public Mono<byte[]> getCoordinatesTiles(@PathVariable int z, @PathVariable int x, @PathVariable int y, @RequestParam(required = false) String filter) {
         MapTileCoordinates coordinates = new MapTileCoordinates(x, y, z);
-        return mapTileService.generateCoordinatesTile(coordinates, nullSafeQueryBuilder(filter));
+        return mapTileService.generateDebugTile(coordinates, nullSafeQueryBuilder(filter));
     }
 
     @RequestMapping(path = "/test/{z}/{x}/{y}.png", produces = MediaType.IMAGE_PNG_VALUE)

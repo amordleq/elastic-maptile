@@ -26,13 +26,8 @@ public class MapTileServiceImpl implements MapTileService {
     }
 
     @Override
-    public Mono<byte[]> generateCountTile(final MapTileCoordinates coordinates, final QueryBuilder additionalFilter) {
-        return generateTile(coordinates, null, additionalFilter, new SimpleCountPngGenerator());
-    }
-
-    @Override
-    public Mono<byte[]> generateCoordinatesTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
-        return generateTile(coordinates, null, additionalFilter, new TileCoordinatesPngGenerator());
+    public Mono<byte[]> generateDebugTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter) {
+        return generateTile(coordinates, null, additionalFilter, new DebugPngGenerator());
     }
 
     @Override

@@ -7,9 +7,7 @@ public interface MapTileService {
 
     Mono<byte[]> generateHeatmapTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
 
-    Mono<byte[]> generateCountTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
-
-    Mono<byte[]> generateCoordinatesTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
+    Mono<byte[]> generateDebugTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
 
     Mono<byte[]> generateTestTile(MapTileCoordinates coordinates, QueryBuilder additionalFilter);
 
