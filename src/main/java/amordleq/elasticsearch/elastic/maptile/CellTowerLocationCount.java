@@ -9,16 +9,17 @@ public class CellTowerLocationCount {
     Long count;
 
     public CellTowerLocationCount(MultiBucketsAggregation.Bucket bucket) {
-        this.count = bucket.getDocCount();
         String key = bucket.getKeyAsString();
         String[] zxy = key.split("/");
         int bucketZ = Integer.parseInt(zxy[0]);
         int bucketX = Integer.parseInt(zxy[1]);
         int bucketY = Integer.parseInt(zxy[2]);
 
-        location = new Location();
-        location.lat = BoundingBox.tile2lat(bucketY, bucketZ);
-        location.lon = BoundingBox.tile2lon(bucketX, bucketZ);
+        this.location = new Location();
+        this.location.lat = (BoundingBox.tile2lat(bucketY, bucketZ) + BoundingBox.tile2lat(bucketY + 1, bucketZ)) / 2;
+        this.location.lon = (BoundingBox.tile2lon(bucketX, bucketZ) + BoundingBox.tile2lon(bucketX + 1, bucketZ)) / 2;
+
+        this.count = bucket.getDocCount();
     }
 
 }
