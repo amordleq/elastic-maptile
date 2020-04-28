@@ -21,6 +21,10 @@ configurations {
 	}
 }
 
+springBoot {
+	buildInfo()
+}
+
 test {
 	jvmArgs '-XX:+AllowRedefinitionToAddDeleteMethods'
 	useJUnitPlatform()
