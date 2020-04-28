@@ -44,7 +44,7 @@ public class HeatmapPngGenerator implements PngGenerator {
     }
 
     private void writeToGraphics(Graphics2D g2d, GeoGrid.Bucket bucket, BoundingBox tileBoundingBox, Scale scale, ColorScheme colorScheme) {
-        BoundingBox bucketBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(createBoundingBoxFromBucket(bucket));
+        BoundingBox bucketBoundingBox = SphericalMercatorProjection.wgs84ToSphericalMercator(new BoundingBox(bucket.getKeyAsString()));
         LOG.trace("Bucket bounds are:{},{},{},{}", bucketBoundingBox.getNorth(), bucketBoundingBox.getWest(), bucketBoundingBox.getSouth(), bucketBoundingBox.getEast());
 
         OffsetBox offsetBox = new OffsetBox(bucketBoundingBox, tileBoundingBox);
@@ -66,15 +66,6 @@ public class HeatmapPngGenerator implements PngGenerator {
         }
 
         return byteArrayOutputStream.toByteArray();
-    }
-
-    private BoundingBox createBoundingBoxFromBucket(GeoGrid.Bucket bucket) {
-        String key = bucket.getKeyAsString();
-        String[] zxy = key.split("/");
-        int bucketZ = Integer.parseInt(zxy[0]);
-        int bucketX = Integer.parseInt(zxy[1]);
-        int bucketY = Integer.parseInt(zxy[2]);
-        return new BoundingBox(bucketX, bucketY, bucketZ);
     }
 
     @Value
