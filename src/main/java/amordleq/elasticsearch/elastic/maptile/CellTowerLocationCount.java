@@ -9,13 +9,15 @@ public class CellTowerLocationCount {
     Long count;
 
     public CellTowerLocationCount(MultiBucketsAggregation.Bucket bucket) {
-        BoundingBox boundingBox = new BoundingBox(bucket.getKeyAsString());
+        this(new BoundingBox(bucket.getKeyAsString()), bucket.getDocCount());
+    }
 
+    public CellTowerLocationCount(BoundingBox boundingBox, Long count) {
         this.location = new Location();
         this.location.lat = boundingBox.getCenterLatitude();
         this.location.lon = boundingBox.getCenterLongitude();
 
-        this.count = bucket.getDocCount();
+        this.count = count;
     }
 
 }
