@@ -21,6 +21,10 @@ configurations {
 	}
 }
 
+bootJar {
+	launchScript()
+}
+
 springBoot {
 	buildInfo()
 }
