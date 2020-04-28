@@ -4,7 +4,7 @@ plugins {
 	id 'groovy'
 }
 
-group = 'amordleq.elasticsearch'
+group = 'systolic.elasticsearch'
 version = '0.0.1-SNAPSHOT'
 sourceCompatibility = '11'
 
